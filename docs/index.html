@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>booklet — PDF imposition tool</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: #2a2d3a;
+      --accent: #7c6af7;
+      --accent-dim: #3d3570;
+      --text: #e0e0e0;
+      --muted: #888;
+      --code-bg: #12141e;
+      --green: #4ade80;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Layout ── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 3rem 2rem 2.5rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.6rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    header h1 span {
+      color: var(--accent);
+    }
+
+    header p {
+      margin-top: 0.75rem;
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 520px;
+      margin-inline: auto;
+    }
+
+    header .badges {
+      margin-top: 1.25rem;
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: var(--accent-dim);
+      color: #c4bcff;
+    }
+
+    .badge.green { background: #14532d; color: var(--green); }
+
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 3rem 2rem 5rem;
+    }
+
+    section { margin-bottom: 3rem; }
+
+    h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    p { margin-bottom: 0.9rem; }
+    p:last-child { margin-bottom: 0; }
+
+    /* ── Code ── */
+    pre, code {
+      font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+      font-size: 0.88rem;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 0.15em 0.45em;
+      border-radius: 4px;
+      color: #c4bcff;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+      line-height: 1.6;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: var(--text);
+    }
+
+    pre .comment { color: var(--muted); }
+    pre .cmd     { color: var(--green); }
+    pre .flag    { color: #f0a070; }
+    pre .val     { color: #7dd3fc; }
+
+    /* ── Signature diagram ── */
+    .sig-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
+      margin: 1.25rem 0;
+    }
+
+    .sig-row {
+      display: contents;
+    }
+
+    .sig-cell {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.55rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+
+    .sig-cell .label {
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin-right: 0.75rem;
+      white-space: nowrap;
+    }
+
+    .sig-cell .pages {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .sig-cell .pages span {
+      background: var(--accent-dim);
+      color: #c4bcff;
+      border-radius: 4px;
+      padding: 0.1em 0.5em;
+      font-weight: 600;
+    }
+
+    .sig-cell.back .pages span {
+      background: #1e3a2f;
+      color: var(--green);
+    }
+
+    .divider {
+      grid-column: 1 / -1;
+      border: none;
+      border-top: 1px dashed var(--border);
+      margin: 0.25rem 0;
+    }
+
+    /* ── Options table ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+
+    th {
+      text-align: left;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    td:first-child code { color: var(--green); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1><span>booklet</span></h1>
+  <p>PDF imposition tool for signature booklet printing.</p>
+  <div class="badges">
+    <span class="badge">Python 3</span>
+    <span class="badge">PyMuPDF</span>
+    <span class="badge green">MIT</span>
+  </div>
+</header>
+
+<main>
+
+  <section>
+    <h2>What it does</h2>
+    <p>
+      Takes any PDF and rearranges its pages into <strong>folded signatures</strong> —
+      a stack of nested sheets that, when printed duplex and folded, read in the correct order.
+      The output PDF has two source pages side by side on each landscape sheet.
+    </p>
+    <p>
+      Pages are grouped into signatures of up to <strong>N sheets</strong> (default: 4 sheets = 16 pages).
+      If the total page count isn't a multiple of 16, the last signature uses fewer sheets
+      and is padded with blank pages to the nearest multiple of 4.
+    </p>
+  </section>
+
+  <section>
+    <h2>Signature layout</h2>
+    <p>For a 4-sheet signature (16 pages), the imposition order is:</p>
+
+    <div class="sig-grid">
+      <div class="sig-cell">
+        <span class="label">Sheet 1 · front</span>
+        <div class="pages"><span>16</span><span>1</span></div>
+      </div>
+      <div class="sig-cell back">
+        <span class="label">Sheet 1 · back</span>
+        <div class="pages"><span>2</span><span>15</span></div>
+      </div>
+      <hr class="divider" />
+      <div class="sig-cell">
+        <span class="label">Sheet 2 · front</span>
+        <div class="pages"><span>14</span><span>3</span></div>
+      </div>
+      <div class="sig-cell back">
+        <span class="label">Sheet 2 · back</span>
+        <div class="pages"><span>4</span><span>13</span></div>
+      </div>
+      <hr class="divider" />
+      <div class="sig-cell">
+        <span class="label">Sheet 3 · front</span>
+        <div class="pages"><span>12</span><span>5</span></div>
+      </div>
+      <div class="sig-cell back">
+        <span class="label">Sheet 3 · back</span>
+        <div class="pages"><span>6</span><span>11</span></div>
+      </div>
+      <hr class="divider" />
+      <div class="sig-cell">
+        <span class="label">Sheet 4 · front</span>
+        <div class="pages"><span>10</span><span>7</span></div>
+      </div>
+      <div class="sig-cell back">
+        <span class="label">Sheet 4 · back</span>
+        <div class="pages"><span>8</span><span>9</span></div>
+      </div>
+    </div>
+
+    <p>
+      Front pages are printed first; back pages are the reverse side of each sheet.
+      Nest all sheets together, fold in half, and bind or stitch the spine.
+    </p>
+  </section>
+
+  <section>
+    <h2>Installation</h2>
+    <p>Requires Python 3 and PyMuPDF:</p>
+    <pre><code><span class="cmd">pip install</span> pymupdf</code></pre>
+    <p>Clone the repo and install the command:</p>
+    <pre><code><span class="cmd">git clone</span> https://github.com/arthurmolina/booklet
+<span class="cmd">cd</span> booklet
+<span class="cmd">chmod</span> +x booklet.py
+<span class="cmd">ln -s</span> <span class="val">"$(pwd)/booklet.py"</span> ~/.local/bin/booklet</code></pre>
+  </section>
+
+  <section>
+    <h2>Usage</h2>
+    <pre><code>booklet &lt;input.pdf&gt; &lt;output.pdf&gt; [options]</code></pre>
+
+    <table>
+      <thead>
+        <tr><th>Option</th><th>Default</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>-s, --sheets N</code></td>
+          <td>4</td>
+          <td>Maximum sheets per signature</td>
+        </tr>
+        <tr>
+          <td><code>-h, --help</code></td>
+          <td>—</td>
+          <td>Show help message</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Examples</h2>
+    <pre><code><span class="comment"># Default: signatures of 4 sheets (16 pages each)</span>
+booklet book.pdf booklet.pdf
+
+<span class="comment"># Smaller signatures — good for thinner paper or stapling</span>
+booklet book.pdf booklet.pdf <span class="flag">--sheets</span> <span class="val">2</span>
+
+<span class="comment"># Single-sheet signatures (4 pages each)</span>
+booklet book.pdf booklet.pdf <span class="flag">-s</span> <span class="val">1</span></code></pre>
+  </section>
+
+  <section>
+    <h2>Printing</h2>
+    <p>
+      Print the output PDF <strong>duplex</strong> with <strong>long-edge flip</strong>
+      (flip on the left/right axis — the default duplex mode for landscape pages on most printers).
+    </p>
+    <p>
+      After printing, sort the sheets by signature, nest each group together, fold in half,
+      and bind or stitch the spines.
+    </p>
+  </section>
+
+</main>
+
+<footer>
+  <a href="https://github.com/arthurmolina/booklet">github.com/arthurmolina/booklet</a>
+</footer>
+
+</body>
+</html>
