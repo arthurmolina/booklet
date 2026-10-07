@@ -26,6 +26,7 @@ def print_help() -> None:
 
   Options:
     -s, --sheets N    Sheets per signature (default: 4)
+    -n, --number      Print page number at the bottom center of each page
     -h, --help        Show this help message
 
   Examples:
@@ -76,7 +77,17 @@ def compute_signatures(n_pages: int, max_sheets: int) -> list[tuple[int, int]]:
     return sigs
 
 
-def build_booklet(input_path: str, output_path: str, max_sheets: int = 4) -> None:
+def add_page_number(page: fitz.Page, number: int, center_x: float, bottom_y: float) -> None:
+    fontsize = 9
+    margin = 14
+    text = str(number)
+    tw = fitz.get_text_length(text, fontname="helv", fontsize=fontsize)
+    x = center_x - tw / 2
+    y = bottom_y - margin
+    page.insert_text((x, y), text, fontname="helv", fontsize=fontsize, color=(0.4, 0.4, 0.4))
+
+
+def build_booklet(input_path: str, output_path: str, max_sheets: int = 4, number_pages: bool = False) -> None:
     src = fitz.open(input_path)
     n_src = len(src)
 
@@ -106,8 +117,12 @@ def build_booklet(input_path: str, output_path: str, max_sheets: int = 4) -> Non
             page = out.new_page(width=out_w, height=out_h)
             if left_idx < n_src:
                 page.show_pdf_page(fitz.Rect(0, 0, pw, ph), src, left_idx)
+                if number_pages:
+                    add_page_number(page, left_idx + 1, pw / 2, ph)
             if right_idx < n_src:
                 page.show_pdf_page(fitz.Rect(pw, 0, out_w, ph), src, right_idx)
+                if number_pages:
+                    add_page_number(page, right_idx + 1, pw + pw / 2, ph)
 
     out.save(output_path, garbage=4, deflate=True)
     out.close()
@@ -127,10 +142,11 @@ if __name__ == "__main__":
     parser.add_argument("input")
     parser.add_argument("output")
     parser.add_argument("-s", "--sheets", type=int, default=4, metavar="N")
+    parser.add_argument("-n", "--number", action="store_true")
     args = parser.parse_args()
 
     if args.sheets < 1:
         print("  Error: --sheets must be at least 1.")
         sys.exit(1)
 
-    build_booklet(args.input, args.output, max_sheets=args.sheets)
+    build_booklet(args.input, args.output, max_sheets=args.sheets, number_pages=args.number)
