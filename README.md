@@ -43,6 +43,7 @@ booklet <input.pdf> <output.pdf> [options]
 
 Options:
   -s, --sheets N    Sheets per signature (default: 4)
+  -n, --number      Print page number at the bottom center of each page
   -h, --help        Show help
 ```
 
@@ -57,6 +58,10 @@ booklet book.pdf booklet.pdf --sheets 2
 
 # Single-sheet signatures (4 pages each)
 booklet book.pdf booklet.pdf -s 1
+
+# Add page numbers at the bottom center of each page
+booklet book.pdf booklet.pdf --number
+booklet book.pdf booklet.pdf -s 2 -n
 ```
 
 ## Printing
