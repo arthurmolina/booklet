@@ -29,9 +29,11 @@ Requires Python 3 and [PyMuPDF](https://pymupdf.readthedocs.io/):
 pip install pymupdf
 ```
 
-To install the `booklet` command globally:
+Clone the repo and install the command:
 
 ```bash
+git clone https://github.com/arthurmolina/booklet
+cd booklet
 chmod +x booklet.py
 ln -s "$(pwd)/booklet.py" ~/.local/bin/booklet
 ```
