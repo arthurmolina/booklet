@@ -333,6 +333,11 @@
           <td>Maximum sheets per signature</td>
         </tr>
         <tr>
+          <td><code>-n, --number</code></td>
+          <td>off</td>
+          <td>Print page number at the bottom center of each page</td>
+        </tr>
+        <tr>
           <td><code>-h, --help</code></td>
           <td>—</td>
           <td>Show help message</td>
@@ -350,7 +355,11 @@ booklet book.pdf booklet.pdf
 booklet book.pdf booklet.pdf <span class="flag">--sheets</span> <span class="val">2</span>
 
 <span class="comment"># Single-sheet signatures (4 pages each)</span>
-booklet book.pdf booklet.pdf <span class="flag">-s</span> <span class="val">1</span></code></pre>
+booklet book.pdf booklet.pdf <span class="flag">-s</span> <span class="val">1</span>
+
+<span class="comment"># Add page numbers at the bottom center of each page</span>
+booklet book.pdf booklet.pdf <span class="flag">--number</span>
+booklet book.pdf booklet.pdf <span class="flag">-s</span> <span class="val">2</span> <span class="flag">-n</span></code></pre>
   </section>
 
   <section>
